@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Explorer Catalog</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:ital,wght@0,400;0,700;1,400&display=swap');
+
+        :root {
+            /* Core Colors */
+            --primary: #222;
+            --accent: #e74c3c;
+            --bg: #fdfdfd;
+            --paper: #ffffff;
+            --text: #333;
+            --gray: #666;
+            --header-bg: #f4f4f4;
+
+            /* Genre Colors */
+            --c-pop: #25d1da;
+            --c-rock: #c0392b; 
+            --c-rnb: #a55eea;
+            --c-elec: #2ed573;
+            --c-country: #ffa502;
+            --c-jazz: #eccc68;
+            --c-indie: #ff9ff3;
+            --c-genreless: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
+        }
+
+        body {
+            background-color: #555;
+            font-family: 'Lato', sans-serif;
+            margin: 0;
+            padding: 40px;
+            color: var(--text);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .page-container {
+            background: var(--paper);
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20mm;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            min-height: 297mm;
+            position: relative;
+        }
+
+        /* HEADER */
+        .cover-page {
+            text-align: center;
+            border-bottom: 4px double var(--primary);
+            padding-bottom: 40px;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin: 0;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-top: 10px;
+            font-weight: 700;
+        }
+
+        /* LAYOUT */
+        .tier-section { margin-bottom: 40px; break-inside: avoid; }
+        .tier-header {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--primary);
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            margin-top: 0;
+        }
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px 40px; /* Reduced vertical gap */
+        }
+        .artist-entry {
+            break-inside: avoid;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .img-frame {
+            width: 100%; height: 200px; background: #eee;
+            overflow: hidden; border-radius: 4px; margin-bottom: 12px;
+            border: 1px solid #ddd;
+        }
+        .img-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+
+        .header-row {
+            display: flex; align-items: baseline; justify-content: space-between;
+            margin-bottom: 8px; flex-wrap: wrap;
+        }
+        .artist-name {
+            font-family: 'Playfair Display', serif; font-size: 1.6rem;
+            margin: 0; color: var(--primary); line-height: 1;
+        }
+        .country-name {
+            font-size: 0.85rem; text-transform: uppercase;
+            color: var(--gray); font-weight: 700; letter-spacing: 0.5px;
+        }
+
+        /* GENRES */
+        .genre-box { margin-bottom: 12px; }
+        .genre-tag {
+            display: inline-block; padding: 3px 10px; border-radius: 12px;
+            font-size: 0.65rem; font-weight: bold; color: #000;
+            margin-right: 5px; text-transform: uppercase;
+        }
+        .g-Pop { background-color: var(--c-pop); }
+        .g-Rock { background-color: var(--c-rock); color: white; }
+        .g-RB { background-color: var(--c-rnb); color: white; }
+        .g-Electronic { background-color: var(--c-elec); }
+        .g-Country { background-color: var(--c-country); }
+        .g-Jazz { background-color: var(--c-jazz); }
+        .g-Indie { background-color: var(--c-indie); }
+        .g-Genreless { background: var(--c-genreless); color: white; }
+
+        .section-header {
+            font-size: 0.75rem; font-weight: 800; text-transform: uppercase;
+            margin-top: 10px; margin-bottom: 4px;
+            background-color: var(--header-bg); color: #444;
+            padding: 4px 8px; border-radius: 4px; display: inline-block;
+            border-left: 3px solid #ccc;
+        }
+
+        .similar-list { font-size: 0.85rem; margin: 0; color: #555; line-height: 1.4; padding-left: 8px; }
+        .track-list { font-size: 0.9rem; margin: 0; color: #333; line-height: 1.5; padding-left: 8px; }
+        
+        .track-num { font-style: normal; color: #888; font-size: 0.8rem; margin-right: 4px; }
+        .track-title { font-style: italic; font-weight: 600; }
+
+        /* Highlight Hits */
+        .special-hit-wrapper {
+            display: block; margin-top: 4px; padding-top: 4px;
+            border-top: 1px dotted #eee;
+        }
+        .japan-hit-wrapper {
+            display: block; margin-bottom: 4px; padding-bottom: 4px;
+            border-bottom: 1px dotted #eee;
+        }
+        
+        .japan-label { font-style: normal; font-weight: bold; color: var(--accent); font-size: 0.8rem; }
+        .fumi-label { font-style: normal; font-weight: bold; color: #8e44ad; font-size: 0.8rem; } /* Purple */
+
+        /* CONTROLS */
+        .controls { position: fixed; top: 20px; right: 20px; z-index: 1000; }
+        .btn-print {
+            background: var(--accent); color: white; border: none; padding: 12px 24px;
+            border-radius: 30px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 1rem; transition: transform 0.2s;
+        }
+        .btn-print:hover { transform: scale(1.05); }
+
+        @media print {
+            body { background: none; padding: 0; }
+            .page-container { width: 100%; max-width: none; box-shadow: none; margin: 0; padding: 0; }
+            .controls { display: none; }
+            .catalog-grid { display: block; column-count: 2; column-gap: 40px; }
+            .artist-entry { display: inline-block; width: 100%; }
+            .tier-header { break-after: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <button class="btn-print" onclick="window.print()">🖨️ Save as PDF</button>
+</div>
+
+<div class="page-container">
+    <div class="cover-page">
+        <h1>Music Explorer</h1>
+        <div class="subtitle">The 2025 Curated Collection</div>
+        <p style="color:#666; margin-top:10px; font-size:0.9rem;">A guide to global pop, indie, and electronic artists for J-Pop fans.</p>
+    </div>
+
+    <div id="catalog-content"></div>
+    
+    <div style="text-align:center; margin-top:50px; border-top:1px solid #ddd; padding-top:20px; font-size:0.8rem; color:#999;">
+        Generated by Music Explorer AI • 2025 Edition
+    </div>
+</div>
+
+<script>
+    function getCountryName(artist) {
+        let origin = artist.origin || "";
+        origin = origin.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '').trim();
+        if (origin.includes("Japan")) return origin;
+        return origin; 
+    }
+
+    const db = [
+        // IMPERIAL
+        { name: "Taylor Swift", tier: "Imperial", country: "USA", genres: ["Pop", "Country"], origin: "USA 🇺🇸", bio: "The world's biggest songwriter.", song: "We Are Never Ever Getting Back Together", fumi_pick: "The Very First Night, Hits Different", essentials: ["Cruel Summer", "Shake It Off", "Love Story"], similar: ["あいみょん", "西野カナ", "IU"], isGroup: false },
+        { name: "Bruno Mars", tier: "Imperial", country: "USA", genres: ["R&B", "Pop", "Jazz"], origin: "USA 🇺🇸", bio: "Funk-pop superstar.", song: "Just The Way You Are", fumi_pick: "Finesse, Perm", essentials: ["Uptown Funk", "24K Magic", "Die With A Smile"], similar: ["Official髭男dism", "三浦大知", "BTS"], isGroup: false },
+        { name: "One Direction", tier: "Imperial", country: "UK", genre: "Pop", origin: "UK 🇬🇧", bio: "Legendary boyband.", song: "Story of My Life", fumi_pick: "Kiss You", essentials: ["What Makes You Beautiful", "Night Changes", "Steal My Girl"], similar: ["King & Prince", "嵐", "TOMORROW X TOGETHER"], isGroup: true },
+        { name: "Justin Bieber", tier: "Imperial", country: "Canada", genres: ["Pop", "R&B"], origin: "Canada 🇨🇦", bio: "Global pop icon.", song: "What Do You Mean?", fumi_pick: "All Around the World", essentials: ["Sorry", "Stay", "Love Yourself"], similar: ["優里", "ジョングク (BTS)", "SIRUP"], isGroup: false },
+        { name: "Ariana Grande", tier: "Imperial", country: "USA", genres: ["Pop", "R&B"], origin: "USA 🇺🇸", bio: "Vocal powerhouse.", song: "Baby I", fumi_pick: "Be Alright, My Everything", essentials: ["Thank U Next", "Break Free", "7 rings"], similar: ["宇多田ヒカル", "Crystal Kay", "aespa"], isGroup: false },
+        { name: "Katy Perry", tier: "Imperial", country: "USA", genres: ["Pop"], origin: "USA 🇺🇸", bio: "Bubblegum pop legend.", song: "California Gurls", fumi_pick: "Last Friday Night, Never Really Over", essentials: ["Firework", "Roar", "Teenage Dream"], similar: ["AKB48", "Red Velvet"], isGroup: false },
+        { name: "Lady Gaga", tier: "Imperial", country: "USA", genres: ["Pop", "Electronic"], origin: "USA 🇺🇸", bio: "Art-pop queen.", song: "Born This Way", fumi_pick: "Rain on Me, Shadow of a Man", essentials: ["Bad Romance", "Poker Face", "Shallow"], similar: ["椎名林檎", "ちゃんみな", "BLACKPINK"], isGroup: false },
+        { name: "Ed Sheeran", tier: "Imperial", country: "UK", genres: ["Pop"], origin: "UK 🇬🇧", bio: "Acoustic hitmaker.", song: "Shape of You", fumi_pick: "Celestial, Castle on the Hill", essentials: ["Perfect", "Photograph", "Thinking Out Loud"], similar: ["星野源", "秦基博", "Vaundy"], isGroup: false },
+        { name: "Maroon 5", tier: "Imperial", country: "USA", genres: ["Pop", "Rock"], origin: "USA 🇺🇸", bio: "Radio pop-rock giants.", song: "Sunday Morning", fumi_pick: "Maps, Misery", essentials: ["Sugar", "Moves Like Jagger", "Payphone"], similar: ["Mrs. GREEN APPLE", "スピッツ"], isGroup: true },
+        { name: "Billie Eilish", tier: "Imperial", country: "USA", genres: ["Genreless", "Pop"], origin: "USA 🇺🇸", bio: "Dark-pop prodigy.", song: "Bad Guy", fumi_pick: "Oxytocin, NDA", essentials: ["Birds of a Feather", "Happier Than Ever", "Ocean Eyes"], similar: ["Ado", "NewJeans", "水曜日のカンパネラ"], isGroup: false },
+        { name: "The Weeknd", tier: "Imperial", country: "Canada", genres: ["R&B", "Pop"], origin: "Canada 🇨🇦", bio: "Cinematic synth-pop.", song: "Blinding Lights", fumi_pick: "Take My Breath", essentials: ["Starboy", "Save Your Tears", "Die For You"], similar: ["藤井風", "DEAN"], isGroup: false },
+        { name: "Justin Timberlake", tier: "Imperial", country: "USA", genres: ["Pop", "R&B"], origin: "USA 🇺🇸", bio: "Legendary showman & NSYNC star.", song: "Can't Stop the Feeling!", fumi_pick: "Love Never Felt So Good", essentials: ["SexyBack", "Mirrors", "Rock Your Body"], similar: ["三浦大知", "EXILE"], isGroup: false },
+        { name: "Sam Smith", tier: "Imperial", country: "UK", genres: ["Pop", "R&B"], origin: "UK 🇬🇧", bio: "Soulful vocal superstar.", song: "Stay With Me", fumi_pick: "Lose You", essentials: ["I'm Not The Only One", "Too Good At Goodbyes", "Dancing With A Stranger"], similar: ["宇多田ヒカル", "藤井風"], isGroup: false },
+        { name: "Coldplay", tier: "Imperial", country: "UK", genres: ["Rock", "Pop"], origin: "UK 🇬🇧", bio: "Stadium-filling anthems with universal emotion.", song: "Viva La Vida", fumi_pick: "Adventure of a Lifetime", essentials: ["Yellow", "A Sky Full of Stars", "Fix You"], similar: ["RADWIMPS", "BUMP OF CHICKEN", "SEKAI NO OWARI"], isGroup: true },
+
+        // A-LIST
+        { name: "Jonas Brothers", tier: "A-List", country: "USA", genres: ["Pop", "Rock"], origin: "USA 🇺🇸", bio: "The ultimate pop-rock brother trio.", song: "Sucker", fumi_pick: "Summer Baby, Slow Motion", essentials: ["Burnin' Up", "What A Man Gotta Do", "Year 3000"], similar: ["King & Prince", "AAA", "Sexy Zone"], isGroup: true },
+        { name: "Dua Lipa", tier: "A-List", country: "UK", genres: ["Pop", "Electronic"], origin: "UK 🇬🇧", bio: "Disco-pop revivalist.", song: "Levitating", fumi_pick: "Hallucinate, These Walls", essentials: ["Don't Start Now", "New Rules", "Houdini"], similar: ["Perfume", "LE SSERAFIM", "eill"], isGroup: false },
+        { name: "Charlie Puth", tier: "A-List", country: "USA", genres: ["Pop"], origin: "USA 🇺🇸", bio: "Pitch-perfect hitmaker.", song: "See You Again", fumi_pick: "Smells Like Me, Cheating on You", essentials: ["Attention", "We Don't Talk Anymore", "Left and Right"], similar: ["藤井風", "Nissy", "ベクヒョン (EXO)"], isGroup: false },
+        { name: "Sabrina Carpenter", tier: "A-List", country: "USA", genres: ["Pop"], origin: "USA 🇺🇸", bio: "Viral pop sensation.", song: "Espresso", fumi_pick: "15 Minutes, Juno", essentials: ["Please Please Please", "Nonsense", "Feather"], similar: ["IVE", "imase", "FEMM"], isGroup: false },
+        { name: "Shawn Mendes", tier: "A-List", country: "Canada", genres: ["Pop"], origin: "Canada 🇨🇦", bio: "Emotional guitar pop.", song: "Treat You Better", fumi_pick: "Lost in Japan", essentials: ["Stitches", "There's Nothing Holdin' Me Back", "Senorita"], similar: ["DISH//", "優里", "北村匠海"], isGroup: false },
+        { name: "Camila Cabello", tier: "A-List", country: "USA", genres: ["Pop"], origin: "USA 🇺🇸", bio: "Latin-pop star.", song: "Havana", fumi_pick: "Channel No. 5", essentials: ["Senorita", "Bam Bam", "Never Be The Same"], similar: ["MAMAMOO", "AI"], isGroup: false },
+        { name: "Olivia Rodrigo", tier: "A-List", country: "USA", genres: ["Pop", "Rock"], origin: "USA 🇺🇸", bio: "Gen-Z pop-punk voice.", song: "Drivers License", fumi_pick: "bad idea right?", essentials: ["Good 4 U", "Vampire", "Deja Vu"], similar: ["YUI", "(G)I-DLE", "アイナ・ジ・エンド"], isGroup: false },
+        { name: "Meghan Trainor", tier: "A-List", country: "USA", genres: ["Pop"], origin: "USA 🇺🇸", bio: "Doo-wop pop anthems.", song: "NO", fumi_pick: "No Excuses", essentials: ["Made You Look", "All About That Bass", "Me Too"], similar: ["Little Glee Monster", "NiziU"], isGroup: false },
+        { name: "P!NK", tier: "A-List", country: "USA", genres: ["Pop", "Rock"], origin: "USA 🇺🇸", bio: "Acrobatic pop-rock.", song: "So What", fumi_pick: "Dreaming", essentials: ["Raise Your Glass", "Just Give Me A Reason", "Try"], similar: ["Superfly", "LiSA"], isGroup: false },
+        { name: "Tate McRae", tier: "A-List", country: "Canada", genres: ["Pop"], origin: "Canada 🇨🇦", bio: "Dance-pop energy.", song: "Greedy", fumi_pick: "what would you do?", essentials: ["You Broke Me First", "Exes", "She's All I Wanna Be"], similar: ["XG", "ITZY"], isGroup: false },
+        { name: "Anne-Marie", tier: "A-List", country: "UK", genres: ["Pop"], origin: "UK 🇬🇧", bio: "Relatable pop anthems.", song: "2002", fumi_pick: "Beautiful", essentials: ["Friends", "Ciao Adios", "Rockabye"], similar: ["NiziU", "TWICE", "milet"], isGroup: false },
+        { name: "Conan Gray", tier: "A-List", country: "USA", genres: ["Pop", "Indie"], origin: "USA (Hiroshima) 🇺🇸🇯🇵", bio: "Hiroshima-born Gen Z pop prince.", song: "Heather", fumi_pick: "Telepath", essentials: ["Maniac", "Memories", "People Watching"], similar: ["藤井風", "Vaundy"], isGroup: false },
+        { name: "OneRepublic", tier: "A-List", country: "USA", genres: ["Pop", "Rock"], origin: "USA 🇺🇸", bio: "Hitmakers behind massive radio songs.", song: "I Ain't Worried", fumi_pick: "Starlight (The Fame), Rescue Me", essentials: ["Counting Stars", "Apologize", "Secrets"], similar: ["Official髭男dism", "Mrs. GREEN APPLE"], isGroup: true },
+        { name: "Backstreet Boys", tier: "A-List", country: "USA", genres: ["Pop"], origin: "USA 🇺🇸", bio: "The boyband that defined a generation.", song: "I Want It That Way", fumi_pick: "Straight Through My Heart", essentials: ["Everybody", "As Long As You Love Me", "Shape of My Heart"], similar: ["嵐", "DA PUMP", "SMAP"], isGroup: true },
+        { name: "Kacey Musgraves", tier: "A-List", country: "USA", genres: ["Country"], origin: "USA 🇺🇸", bio: "Grammy-winning cosmic country.", song: "Golden Hour", fumi_pick: "High Horse", essentials: ["Slow Burn", "Rainbow", "Butterflies"], similar: ["くるり", "上白石萌音"], isGroup: false },
+        { name: "Carly Rae Jepsen", tier: "A-List", country: "Canada", genre: "Pop", origin: "Canada 🇨🇦", bio: "Beloved 'Carly-chan' in Japan.", song: "I Really Like You", fumi_pick: "Talking to Yourself, Party for One", essentials: ["Call Me Maybe", "Run Away With Me", "Cut To The Feeling"], similar: ["TWICE", "きゃりーぱみゅぱみゅ", "NiziU"], isGroup: false },
+        { name: "The Chainsmokers", tier: "A-List", country: "USA", genres: ["Electronic", "Pop"], origin: "USA 🇺🇸", bio: "Chart-topping DJ duo.", song: "Closer", fumi_pick: "I Love U", essentials: ["Something Just Like This", "Don't Let Me Down", "Roses"], similar: ["RADWIMPS", "JO1"], isGroup: true },
+        { name: "Little Mix", tier: "A-List", country: "UK", genres: ["Pop"], origin: "UK 🇬🇧", bio: "Powerful girl group harmonies.", song: "Wings", fumi_pick: "Move, Oops", essentials: ["Black Magic", "Shout Out to My Ex", "Secret Love Song"], similar: ["Little Glee Monster", "NiziU"], isGroup: true },
+        { name: "Clean Bandit", tier: "A-List", country: "UK", genres: ["Electronic", "Pop"], origin: "UK 🇬🇧", bio: "Classical-infused electronic pop.", song: "Rather Be", fumi_pick: "Stronger", essentials: ["Symphony", "Rockabye", "Solo"], similar: ["SEKAI NO OWARI", "YOASOBI"], isGroup: true },
+
+        // CULT / BAND
+        { name: "The 1975", tier: "Cult", country: "UK", genres: ["Rock", "Pop"], origin: "UK 🇬🇧", bio: "Modern art-pop band.", song: "Chocolate", fumi_pick: "The Sound, Me & You Together Song", essentials: ["Somebody Else", "It's Not Living (If It's Not With You)", "About You"], similar: ["King Gnu", "[Alexandros]", "Awesome City Club"], isGroup: true },
+        { name: "Owl City", tier: "Cult", country: "USA", genres: ["Electronic", "Pop"], origin: "USA 🇺🇸", bio: "Dreamy synth-pop.", song: "Good Time", fumi_pick: "To the Sky, Thunderstruck", essentials: ["Fireflies", "Vanilla Twilight", "Shooting Star"], similar: ["SEKAI NO OWARI"], isGroup: false },
+        { name: "5 Seconds of Summer", tier: "Cult", country: "Australia", genres: ["Rock", "Pop"], origin: "Australia 🇦🇺", bio: "Pop-punk to Pop.", song: "She Looks So Perfect", fumi_pick: "BLENDER, NOT OK", essentials: ["Youngblood", "Teeth", "Ghost of You"], similar: ["ONE OK ROCK", "ELLEGARDEN", "Day6"], isGroup: true },
+        { name: "Charli XCX", tier: "Cult", country: "UK", genres: ["Genreless", "Electronic"], origin: "UK 🇬🇧", bio: "Hyperpop pioneer.", song: "Boom Clap", fumi_pick: "Guess", essentials: ["Speed Drive", "I Love It", "1999"], similar: ["Reol", "f(x)"], isGroup: false },
+        { name: "Porter Robinson", tier: "Cult", country: "USA", genre: "Electronic", origin: "USA 🇺🇸", bio: "Anime-inspired EDM.", song: "Shelter", fumi_pick: "Cheerleader, Look at the Sky", essentials: ["Sad Machine", "Something Comforting", "Everything Goes On"], similar: ["YOASOBI", "米津玄師", "Eve"], isGroup: false },
+        { name: "JVKE", tier: "Cult", country: "USA", genre: "Pop", origin: "USA 🇺🇸", bio: "Piano-pop viral star.", song: "Golden Hour", fumi_pick: "i can’t help it", essentials: ["Upside Down", "this is what falling in love feels like", "moon and back"], similar: ["Vaundy", "優里"], isGroup: false },
+        { name: "OK Go", tier: "Cult", country: "USA", genre: "Rock", origin: "USA 🇺🇸", bio: "Creative video kings.", song: "I Won't Let You Down", fumi_pick: "I Don’t Understand You", essentials: ["Here It Goes Again", "This Too Shall Pass", "Needing/Getting"], similar: ["サカナクション"], isGroup: true },
+        { name: "Why Don’t We", tier: "Cult", country: "USA", genre: "Pop", origin: "USA 🇺🇸", bio: "Harmony-driven boyband.", song: "8 Letters", fumi_pick: "Love Back", essentials: ["Trust Fund Baby", "Big Plans", "Fallin'"], similar: ["BE:FIRST", "JO1"], isGroup: true },
+        { name: "Avril Lavigne", tier: "Cult", country: "Canada", genres: ["Rock", "Pop"], origin: "Canada 🇨🇦", bio: "The eternal Rock Princess.", song: "Girlfriend", fumi_pick: "The Best Damn Thing, What the Hell", essentials: ["Complicated", "Sk8er Boi", "When You're Gone"], similar: ["LiSA", "YUI", "SCANDAL"], isGroup: false },
+        { name: "Zedd", tier: "Cult", country: "Europe", genres: ["Electronic"], origin: "Germany 🇩🇪", bio: "Melodic EDM genius.", song: "Stay", fumi_pick: "Daisy, Addicted to a Memory", essentials: ["The Middle", "Clarity", "Break Free"], similar: ["Perfume", "SEKAI NO OWARI"], isGroup: false },
+        { name: "Marshmello", tier: "Cult", country: "USA", genres: ["Electronic"], origin: "USA 🇺🇸", bio: "Masked DJ with catchy beats.", song: "Alone", fumi_pick: "Closer", essentials: ["Happier", "Friends", "Silence"], similar: ["きゃりーぱみゅぱみゅ", "JO1"], isGroup: false },
+        { name: "Lauv", tier: "Cult", country: "USA", genres: ["Pop", "Indie"], origin: "USA 🇺🇸", bio: "Modern sad-pop king.", song: "Paris in the Rain", fumi_pick: "Modern Loneliness, Drugs & The Internet", essentials: ["I Like Me Better", "i'm so tired", "Mean It"], similar: ["iri", "Paul Kim", "SIRUP"], isGroup: false },
+        { name: "Galantis", tier: "Cult", country: "Europe", genres: ["Electronic"], origin: "Sweden 🇸🇪", bio: "Upbeat dance-pop duo.", song: "No Money", fumi_pick: "Satisfied", essentials: ["Runaway (U & I)", "Peanut Butter Jelly", "Hunter"], similar: ["SEKAI NO OWARI", "Perfume"], isGroup: true },
+
+        // REGIONAL
+        { name: "Christopher", tier: "Regional", country: "Europe", genres: ["Pop"], origin: "Denmark 🇩🇰", bio: "Danish star huge in Asia.", song: "Bad", fumi_pick: "Moments", essentials: ["Irony", "Leap of Faith", "Told You So"], similar: ["wacci", "D.O. (EXO)"], isGroup: false },
+        { name: "Peder Elias", tier: "Regional", country: "Europe", genres: ["Pop"], origin: "Norway 🇳🇴", bio: "Warm acoustic pop.", song: "Loving You Girl", fumi_pick: "Hey Hello, Fly to the Moon", essentials: ["Bonfire", "Paper Plane", "When I'm Still Getting Over You"], similar: ["SEVENTEEN", "なにわ男子"], isGroup: false },
+        { name: "Jake Miller", tier: "Regional", country: "USA", genres: ["Pop"], origin: "USA 🇺🇸", bio: "High-energy positive pop rap.", song: "Dazed and Confused", fumi_pick: "What You’re Looking For", essentials: ["Rumors", "Ross and Rachel", "Click"], similar: ["Da-iCE", "SKY-HI"], isGroup: false },
+        { name: "Jamie Miller", tier: "Regional", country: "UK", genres: ["Pop"], origin: "UK 🇬🇧", bio: "Voice of an angel.", song: "Here's Your Perfect", fumi_pick: "Maybe Next Time, Only Place", essentials: ["I Lost Myself In Loving You", "Wishes", "City That Never Sleeps"], similar: ["優里", "wacci"], isGroup: false },
+        { name: "HRVY", tier: "Regional", country: "UK", genres: ["Pop"], origin: "UK 🇬🇧", bio: "Catchy, dance-ready pop.", song: "Personal", fumi_pick: "Never Be Us, Party in My Head", essentials: ["Million Ways", "Don't Need Your Love", "1 Day 2 Nights"], similar: ["Nissy", "GENIC"], isGroup: false },
+        { name: "Johnny Orlando", tier: "Regional", country: "Canada", genres: ["Pop"], origin: "Canada 🇨🇦", bio: "Rising star with smooth vocals.", song: "What If", fumi_pick: "leave the light on", essentials: ["Everyone Wants You", "Phobias", "Daydream"], similar: ["NOA", "8LOOM"], isGroup: false },
+        { name: "HONNE", tier: "Regional", country: "UK", genres: ["Electronic", "R&B"], origin: "UK 🇬🇧", bio: "Chill electronic soul.", song: "Day 1 ◑", fumi_pick: "COMING HOME, TALK TO ME", essentials: ["no song without you", "Warm on a Cold Night", "Location Unknown"], similar: ["Nulbarich", "Suchmos"], isGroup: true },
+        { name: "LANY", tier: "Regional", country: "USA", genre: "Pop", origin: "USA 🇺🇸", bio: "California dream pop.", song: "ILYSB", fumi_pick: "XXL, care less", essentials: ["Malibu Nights", "Thick And Thin", "dna"], similar: ["offonoff", "Lucky Tapes"], isGroup: true },
+        { name: "Stevie Hoang", tier: "Regional", country: "UK", genre: "R&B", origin: "UK 🇬🇧", bio: "Indie R&B King.", song: "Addicted", fumi_pick: "Right Here Waiting", essentials: ["No Coming Back", "All Night Long", "Fight For You"], similar: ["清水翔太", "CHEMISTRY"], isGroup: false },
+        { name: "Jess Glynne", tier: "Regional", country: "UK", genre: "Pop", origin: "UK 🇬🇧", bio: "Soulful dance vocals.", song: "Hold My Hand", fumi_pick: "All I Am, Easy", essentials: ["Rather Be", "Don't Be So Hard On Yourself", "I'll Be There"], similar: ["絢香", "milet"], isGroup: false },
+        { name: "Olly Murs", tier: "Regional", country: "UK", genre: "Pop", origin: "UK 🇬🇧", bio: "Upbeat entertainer.", song: "Troublemaker", fumi_pick: "Feel the Same, Don’t Stop Dancing", essentials: ["Dance With Me Tonight", "Wrapped Up", "Dear Darlin'"], similar: ["Nissy", "星野源"], isGroup: false },
+        { name: "Austin Mahone", tier: "Regional", country: "USA", genre: "Pop", origin: "USA 🇺🇸", bio: "Famous for 'Dirty Work'.", song: "Dirty Work", fumi_pick: "So Good", essentials: ["Mmm Yeah", "What About Love", "Say You're Just A Friend"], similar: ["DA PUMP", "三代目 J SOUL BROTHERS"], isGroup: false },
+        { name: "Daniel Powter", tier: "Regional", country: "Canada", genres: ["Pop"], origin: "Canada 🇨🇦", bio: "Famous for 'Bad Day' worldwide.", song: "Bad Day", fumi_pick: "Delicious, Save Your Life", essentials: ["Best of Me", "Free Loop", "Next Plane Home"], similar: ["スキマスイッチ", "コブクロ"], isGroup: false },
+        { name: "Joel Corry", tier: "Regional", country: "UK", genres: ["Electronic"], origin: "UK 🇬🇧", bio: "House hits perfect for workouts.", song: "Head & Heart", fumi_pick: "I Wish", essentials: ["Lonely", "BED", "OUT OUT"], similar: ["BE:FIRST", "GENERATIONS"], isGroup: false },
+
+        // INDIE
+        { name: "Dan + Shay", tier: "Indie", country: "USA", genres: ["Country", "Pop"], origin: "USA 🇺🇸", bio: "Romantic country-pop.", song: "10,000 Hours", fumi_pick: "Only Us", essentials: ["Tequila", "Speechless", "Glad You Exist"], similar: ["スキマスイッチ", "コブクロ"], isGroup: true },
+        { name: "Valley", tier: "Indie", country: "Canada", genres: ["Pop", "Indie", "Rock"], origin: "Canada 🇨🇦", bio: "Nostalgic indie pop.", song: "Like 1999", fumi_pick: "Bass Player’s Brother, Have a Good Summer", essentials: ["Oh shit...are we in love?", "hiccup", "Society"], similar: ["マカロニえんぴつ", "sumika"], isGroup: true },
+        { name: "The Band CAMINO", tier: "Indie", country: "USA", genres: ["Rock", "Indie"], origin: "USA 🇺🇸", bio: "Electrifying pop-rock.", song: "Daphne Blue", fumi_pick: "I Think I Like You", essentials: ["2/14", "See Through", "Roses"], similar: ["緑黄色社会"], isGroup: true },
+        { name: "Jeremy Zucker", tier: "Indie", country: "USA", genres: ["Pop", "Indie"], origin: "USA 🇺🇸", bio: "Lo-fi pop perfect for cafes.", song: "comethru", fumi_pick: "OK", essentials: ["all the kids are depressed", "you were good to me", "always, i'll care"], similar: ["平井 大", "imase", "SIRUP"], isGroup: false },
+        { name: "Nightly", tier: "Indie", country: "USA", genres: ["Pop", "Rock"], origin: "USA 🇺🇸", bio: "Moody alternative pop.", song: "The Movies", fumi_pick: "where do we go from here", essentials: ["Twenty Something", "Hate My Favorite Band", "XO"], similar: ["Novelbright", "Mrs. GREEN APPLE"], isGroup: true },
+        { name: "Maisie Peters", tier: "Indie", country: "UK", genre: "Pop", origin: "UK 🇬🇧", bio: "Witty storytelling pop.", song: "Psycho", fumi_pick: "Blonde, Good Enough", essentials: ["Lost The Breakup", "History of Man", "John Hughes Movie"], similar: ["YAMA", "milet", "BOL4"], isGroup: false },
+        { name: "Rina Sawayama", tier: "Indie", country: "Europe", genres: ["Genreless", "Pop"], origin: "Japan/UK 🇯🇵🇬🇧", bio: "Genre-bending pop.", song: "XS", fumi_pick: "Hurricanes", essentials: ["Comme Des Garcons", "Bad Friend", "This Hell"], similar: ["宇多田ヒカル", "Stray Kids"], isGroup: false },
+        { name: "Pale Waves", tier: "Indie", country: "UK", genre: "Rock", origin: "UK 🇬🇧", bio: "Goth-aesthetic pop.", song: "Television Romance", fumi_pick: "Hate to Hurt You, Glasgow", essentials: ["There's A Honey", "She's My Religion", "Easy"], similar: ["the brilliant green", "ポルカドットスティングレイ"], isGroup: true },
+        { name: "Knox", tier: "Indie", country: "USA", genre: "Rock", origin: "USA 🇺🇸", bio: "Viral high-energy rock.", song: "Not The 1975", fumi_pick: "Going, Going, Gone", essentials: ["Sneakers", "I Don't Wanna Know", "Love Letter"], similar: ["04 Limited Sazabys"], isGroup: false },
+        { name: "Fly By Midnight", tier: "Indie", country: "USA", genres: ["Pop", "Rock"], origin: "USA 🇺🇸", bio: "Retro-pop duo.", song: "Vibe", fumi_pick: "In the Night, The Weather", essentials: ["Lovely", "Love Me Like A Friend", "Automatic"], similar: ["Novelbright", "Mrs. GREEN APPLE"], isGroup: true },
+        { name: "NOTD", tier: "Indie", country: "Europe", genre: "Electronic", origin: "Sweden 🇸🇪", bio: "Pop-dance production duo.", song: "So Close", fumi_pick: "Hold on Me", essentials: ["I Don't Know Why", "Keep You Mine", "Nobody"], similar: ["Mrs. GREEN APPLE"], isGroup: true },
+        { name: "Sigrid", tier: "Indie", country: "Europe", genre: "Pop", origin: "Norway 🇳🇴", bio: "Power-pop anthem maker.", song: "Strangers", fumi_pick: "Thank Me Later, Wanted It to Be You", essentials: ["Don't Kill My Vibe", "Sucker Punch", "Mirror"], similar: ["milet", "YAMA"], isGroup: false },
+        { name: "The Japanese House", tier: "Indie", country: "UK", genres: ["Indie", "Pop"], origin: "UK 🇬🇧", bio: "Ambient, layered indie pop.", song: "Saw You In A Dream", fumi_pick: "Sad to Breathe", essentials: ["Sunshine Baby", "Boyhood", "Touching Yourself"], similar: ["羊文学", "Lucky Tapes"], isGroup: false },
+        { name: "JP Saxe", tier: "Indie", country: "Canada", genres: ["Pop"], origin: "Canada 🇨🇦", bio: "Heartfelt lyrical ballads.", song: "If the World Was Ending", fumi_pick: "Anywhere", essentials: ["A Little Bit Yours", "Hey Stupid, I Love You", "I Don't Miss You"], similar: ["優里", "wacci"], isGroup: false },
+        { name: "Astrid S", tier: "Indie", country: "Europe", genres: ["Pop"], origin: "Norway 🇳🇴", bio: "Sleek Scandinavian pop.", song: "Hurts So Good", fumi_pick: "Hot Fever Dream", essentials: ["Think Before I Talk", "Such A Boy", "Emotion"], similar: ["milet", "eill"], isGroup: false },
+
+        // NICHE
+        { name: "Modernlove.", tier: "Niche", country: "Europe", genres: ["Rock", "Indie"], origin: "Ireland 🇮🇪", bio: "Rising indie-rock with nostalgic vibes.", song: "Follow You", fumi_pick: "2gether4ever", essentials: ["2 Missed Calls", "Liquorice", "Don't Wanna"], similar: ["羊文学", "マカロニえんぴつ"], isGroup: true },
+        { name: "joan", tier: "Niche", country: "USA", genres: ["Pop", "Indie"], origin: "USA 🇺🇸", bio: "80s-inspired synth-pop duo.", song: "drive all night", fumi_pick: "turning green, come over", essentials: ["i loved you first", "so good", "love somebody like you"], similar: ["Awesome City Club", "Lucky Tapes"], isGroup: true },
+        { name: "BLÜ EYES", tier: "Niche", country: "USA", genres: ["Pop"], origin: "USA 🇺🇸", bio: "Vulnerable songwriting about mental health.", song: "Healing Hurts", fumi_pick: "CHAOS", essentials: ["you'd never know", "stuck in my head", "supposed to be"], similar: ["あいみょん", "Anly"], isGroup: false },
+        { name: "A Great Big World", tier: "Niche", country: "USA", genre: "Pop", origin: "USA 🇺🇸", bio: "Emotional piano ballads.", song: "Say Something", fumi_pick: "Always Home, Heart Family", essentials: ["Everyone Is Gay", "Rockstar", "You'll Be Okay"], similar: ["wacci", "いきものがかり"], isGroup: true },
+        { name: "Jacob Collier", tier: "Niche", country: "UK", genres: ["Genreless", "Jazz"], origin: "UK 🇬🇧", bio: "Musical genius.", song: "All I Need", fumi_pick: "Over You", essentials: ["Sleeping On My Dreams", "Moon River", "Witness Me"], similar: ["TENDRE", "Kroi"], isGroup: false },
+        { name: "Stacey Ryan", tier: "Niche", country: "Canada", genre: "Jazz", origin: "Canada 🇨🇦", bio: "Jazz-pop viral star.", song: "Fall In Love Alone", fumi_pick: "Good to Be Alone", essentials: ["Don't Text Me When You're Drunk", "Deep End", "Over Tonight"], similar: ["Penthouse", "MAMAMOO"], isGroup: false },
+        { name: "John K", tier: "Niche", country: "USA", genre: "Pop", origin: "USA 🇺🇸", bio: "Smooth Florida pop.", song: "If We Never Met", fumi_pick: "Honey", essentials: ["6 months", "Happiness", "Cheap Sunglasses"], similar: ["平井 大", "SIRUP"], isGroup: false },
+        { name: "Gabrielle Aplin", tier: "Niche", country: "UK", genre: "Pop", origin: "UK 🇬🇧", bio: "Acoustic folk-pop.", song: "Please Don't Say You Love Me", fumi_pick: "Side by Side, Don’t Say", essentials: ["Home", "Miss You", "Panic Cord"], similar: ["YUI", "miwa"], isGroup: false },
+        { name: "Cory Wong", tier: "Niche", country: "USA", genre: "Jazz", origin: "USA 🇺🇸", bio: "Funk guitar master.", song: "Dean Town", fumi_pick: "Tongue Tied, Starship Syncopation", essentials: ["Cosmic Sans", "Lunchtime", "Golden"], similar: ["T-SQUARE", "Kroi"], isGroup: false },
+        { name: "Sam Ock", tier: "Niche", country: "USA", genre: "R&B", origin: "USA 🇺🇸", bio: "Melodic rap & soul.", song: "Beautiful People", fumi_pick: "Distance, Shoot for the Moon", essentials: ["Rollercoaster", "Choose 2 Love", "Make Me Smile"], similar: ["Shin Sakiura", "Kan Sano"], isGroup: false },
+        { name: "Hotel Apache", tier: "Niche", country: "USA", genre: "Pop", origin: "USA 🇺🇸", bio: "Retro 80s vibes.", song: "Stay", fumi_pick: "Till the End of Time", essentials: ["Midnight", "Dial Tone", "1985"], similar: ["Yogee New Waves", "Awesome City Club"], isGroup: true },
+        { name: "19&YOU", tier: "Niche", country: "USA", genre: "Pop", origin: "USA 🇺🇸", bio: "Indie pop band with fresh vibes.", song: "PART OF YOU", fumi_pick: "Loving Me", essentials: ["BORED", "HEAD/HEART", "RUNNIN'"], similar: ["Yogee New Waves"], isGroup: true },
+        { name: "slchld", tier: "Niche", country: "Canada", genres: ["R&B", "Indie"], origin: "Canada/Korea 🇨🇦🇰🇷", bio: "Chill R&B vibes.", song: "she likes spring, I prefer winter", fumi_pick: "I find peace in the rain", essentials: ["you won't be there for me", "maybe we need a break", "camellia"], similar: ["SIRUP", "iri"], isGroup: false },
+        { name: "Sody", tier: "Niche", country: "UK", genres: ["Pop"], origin: "UK 🇬🇧", bio: "Raw, emotional pop.", song: "Is Your Bedroom Ceiling Bored?", fumi_pick: "Bitch (I Said It)", essentials: ["The Bully", "Butterfly", "Maybe It Was Me"], similar: ["Anly", "yama"], isGroup: false },
+        { name: "Tauren Wells", tier: "Niche", country: "USA", genres: ["Pop", "R&B"], origin: "USA 🇺🇸", bio: "Soulful pop vocals.", song: "Known", fumi_pick: "Close, Like You Love Me", essentials: ["Hills and Valleys", "Famous For", "Joy In The Morning"], similar: ["三浦大知", "SKY-HI"], isGroup: false }
+    ];
+
+    // --- RENDER LOGIC BY TIER ---
+    const contentDiv = document.getElementById('catalog-content');
+
+    const tiers = [
+        { id: "Imperial", label: "👑 IMPERIAL (Global Icons)" },
+        { id: "A-List", label: "🌟 A-LIST (Radio Hits)" },
+        { id: "Cult", label: "🎸 CULT & BANDS" },
+        { id: "Regional", label: "🌏 REGIONAL KINGS (Asia)" },
+        { id: "Indie", label: "☕ INDIE & VIBE" },
+        { id: "Niche", label: "💎 NICHE / DEVELOPING" }
+    ];
+
+    tiers.forEach(tierObj => {
+        // 1. Filter
+        const tierArtists = db.filter(a => a.tier === tierObj.id);
+
+        // 2. Sort: Solo First, Groups Last
+        tierArtists.sort((a, b) => {
+            if (a.isGroup !== b.isGroup) {
+                return a.isGroup ? 1 : -1;
+            }
+            return 0; // Keep original order otherwise
+        });
+
+        if (tierArtists.length > 0) {
+            const section = document.createElement('div');
+            section.className = 'tier-section';
+
+            const header = document.createElement('h2');
+            header.className = 'tier-header';
+            header.innerText = tierObj.label;
+            section.appendChild(header);
+
+            const grid = document.createElement('div');
+            grid.className = 'catalog-grid';
+
+            tierArtists.forEach(artist => {
+                const div = document.createElement('div');
+                div.className = 'artist-entry';
+
+                // Genres
+                const genres = Array.isArray(artist.genres) ? artist.genres : [artist.genre];
+                let genreHtml = genres.map(g => {
+                    let className = 'genre-tag';
+                    if (g === 'Pop') className += ' g-Pop';
+                    else if (g === 'Rock') className += ' g-Rock';
+                    else if (g === 'R&B') className += ' g-RB';
+                    else if (g === 'Electronic') className += ' g-Electronic';
+                    else if (g === 'Country') className += ' g-Country';
+                    else if (g === 'Jazz') className += ' g-Jazz';
+                    else if (g === 'Indie') className += ' g-Indie';
+                    else if (g === 'Genreless') className += ' g-Genreless';
+                    else className += ' g-Pop'; 
+                    return `<span class="${className}">${g}</span>`;
+                }).join("");
+
+                // Tracks
+                const trackHtml = artist.essentials.map((t, i) => `<div><span class="track-num">${i+1}.</span> <span class="track-title">${t}</span></div>`).join("");
+
+                // Dynamic Pick Label
+                // Use plural if comma exists AND it's not Knox (Edge Case)
+                const pickLabel = (artist.fumi_pick.includes(',') && artist.name !== 'Knox') ? "Fumi's Picks" : "Fumi's Pick";
+
+                // Country Text
+                const countryText = getCountryName(artist);
+
+                div.innerHTML = `
+                    <div class="img-frame">
+                        <img src="images/${artist.name}.jpg" alt="${artist.name}" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(artist.name)}&background=random&color=fff&size=400&bold=true';">
+                    </div>
+                    
+                    <div class="header-row">
+                        <h2 class="artist-name">${artist.name}</h2>
+                        <div class="country-name">${countryText}</div>
+                    </div>
+
+                    <div class="genre-box">${genreHtml}</div>
+                    
+                    <div class="section-header">Reference Artists (J/K-POP)</div>
+                    <p class="similar-list">${artist.similar.join(", ")}</p>
+
+                    <div class="section-header">Essential Tracks</div>
+                    <div class="track-list">
+                        <span class="japan-hit-wrapper"><span class="japan-label">🇯🇵 Japan Hit:</span> <span class="track-title">${artist.song}</span></span>
+                        ${trackHtml}
+                        <span class="special-hit-wrapper"><span class="fumi-label">🎧 ${pickLabel}:</span> <span class="track-title">${artist.fumi_pick}</span></span>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+
+            section.appendChild(grid);
+            contentDiv.appendChild(section);
+        }
+    });
+</script>
+
+</body>
+</html>
